@@ -63,14 +63,34 @@ component mod10 is
 			quotient : out STD_LOGIC_VECTOR(3 downto 0);
 			remainder : out STD_LOGIC_VECTOR(3 downto 0));
 end component;
+-- debounce component
+component debounce is
+    generic(
+        pulse: boolean := true;
+        active_low: boolean := true;
+        delay: integer := 100000);
+    port (
+        clk: in std_logic;
+        reset: in std_logic; -- active low
+        input: in std_logic;
+        debounce: out std_logic);
+end component;
+
 -- Signals
 signal temp1,temp2,temp3,temp4 : STD_LOGIC_VECTOR(6 downto 0);
 signal sel : STD_LOGIC_VECTOR(1 downto 0);
-signal temp_clk,sec_clk,min_clk,hrs_clk,sec_reset,min_reset,hrs_reset,hrs_clk1,hrs_clk2 : STD_LOGIC;
+signal min_clk1,temp_clk,sec_clk,min_clk,hrs_clk,sec_reset,min_reset,hrs_reset,hrs_clk1,hrs_clk2 : STD_LOGIC;
 signal minutes,hours : std_logic_vector(5 downto 0);
 signal disp1,disp2,disp3,disp4  : STD_LOGIC_VECTOR(3 downto 0);
+signal db_min,db_hrs : std_logic;
 
 begin
+    DBM: debounce
+        generic map (pulse => true, active_low => false, delay => 100000)
+        port map (clk => clk, reset => reset, input => set_min, debounce => db_min);
+    DBH: debounce
+        generic map (pulse => true, active_low => false, delay => 100000)
+        port map (clk => clk, reset => reset, input => set_hrs, debounce => db_hrs);
     FD: freq_div
         generic map(N=>210000)
         port map(clk_board => clk,clk_out => temp_clk);
@@ -96,14 +116,15 @@ begin
         port map(divident => minutes, quotient => disp2 , remainder => disp1);
     COUNTER_MIN: counter_time
         generic map(n=>6)
-        port map(clk => min_clk XOR set_min, reset => reset, output => minutes, output_flag => hrs_clk1);
+        port map(clk => min_clk1, reset => reset, output => minutes, output_flag => hrs_clk1);
+    min_clk1 <= min_clk XOR db_min;
     HRS_MOD: mod10
         generic map(divisor=>10)
         port map(divident => hours, quotient => disp4 , remainder => disp3);
     COUNTER_HRS: counter_time_hrs
         generic map(n=>6)
         port map(clk => hrs_clk, reset => reset, output => hours, output_flag => hrs_clk2);
-    hrs_clk <=  hrs_clk1 XOR set_hrs;
+    hrs_clk <=  hrs_clk1 XOR db_hrs;
     MUX7: mux_4_to_1_7
         port map(sel => sel,D1 => temp1, D2 => temp2, D3 => temp3, D4 => temp4, Y => disp_out);
     DEMUX: demux_4_to_1
