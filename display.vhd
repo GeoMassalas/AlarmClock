@@ -4,6 +4,7 @@ use IEEE.STD_LOGIC_1164.ALL;
 entity display is
     port(   clk  : in STD_LOGIC;
             reset : in STD_LOGIC;
+            set_min,set_hrs : in STD_LOGIC;
             disp_out : out STD_LOGIC_VECTOR(6 downto 0);
             disp_enable : out STD_LOGIC_VECTOR(3 downto 0);
             seconds : out STD_LOGIC_VECTOR(5 downto 0));
@@ -95,14 +96,14 @@ begin
         port map(divident => minutes, quotient => disp2 , remainder => disp1);
     COUNTER_MIN: counter_time
         generic map(n=>6)
-        port map(clk => min_clk, reset => reset, output => minutes, output_flag => hrs_clk1);
+        port map(clk => min_clk XOR set_min, reset => reset, output => minutes, output_flag => hrs_clk1);
     HRS_MOD: mod10
         generic map(divisor=>10)
         port map(divident => hours, quotient => disp4 , remainder => disp3);
     COUNTER_HRS: counter_time_hrs
         generic map(n=>6)
         port map(clk => hrs_clk, reset => reset, output => hours, output_flag => hrs_clk2);
-    hrs_clk <=  hrs_clk1 OR hrs_clk2;
+    hrs_clk <=  hrs_clk1 XOR set_hrs;
     MUX7: mux_4_to_1_7
         port map(sel => sel,D1 => temp1, D2 => temp2, D3 => temp3, D4 => temp4, Y => disp_out);
     DEMUX: demux_4_to_1
