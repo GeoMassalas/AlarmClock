@@ -1,3 +1,4 @@
+-- Simple demultiplexer to run the 7segment diplay
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 

@@ -1,5 +1,6 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
+use work.components.all;
 
 entity display is
     port(   clk  : in STD_LOGIC;
@@ -11,70 +12,6 @@ entity display is
 end display;
 
 architecture Behavioral of display is
--- 2 bit counter Component
-component counter is
-    generic(n: natural := 2);
-    port (clk: in STD_LOGIC;
-            reset : in std_logic;
-			output : out STD_LOGIC_VECTOR(n-1 downto 0));
-end component;
--- sec/min counter components
-component counter_time is
-    generic(n: natural := 2);
-    port (clk: in STD_LOGIC;
-            reset : in std_logic;
-            output : out STD_LOGIC_VECTOR(n-1 downto 0);
-            output_flag : out STD_LOGIC);
-end component;
--- hrs counter component
-component counter_time_hrs is
-    generic(n: natural := 2);
-    port (clk: in STD_LOGIC;
-            reset : in std_logic;
-            output : out STD_LOGIC_VECTOR(n-1 downto 0);
-            output_flag : out STD_LOGIC);
-end component;
--- 7bit multiplexer
-component mux_4_to_1_7 is
-	port(   sel : in STD_LOGIC_VECTOR(1 downto 0); 
-			D1,D2,D3,D4 : in STD_LOGIC_VECTOR(6 downto 0);
-			Y : out STD_LOGIC_VECTOR(6 downto 0));
-end component;
--- demultiplexer 4 to 1
-component demux_4_to_1 is
-	port(  sel : in STD_LOGIC_VECTOR(1 downto 0); 
-			Y  : out STD_LOGIC_VECTOR(3 downto 0));
-end component;
--- bcd to 7seg decoder
-component bcddecoder is
-	port(   input : in STD_LOGIC_VECTOR(3 downto 0);
-			output : out STD_LOGIC_VECTOR(6 downto 0));
-end component;
--- Frequency Divider
-component freq_div is
-	generic (N:positive:=1);
-	port(clk_board : in STD_LOGIC;
-			clk_out : out STD_LOGIC);
-end component;
--- mod10 component
-component mod10 is
-	generic(divisor : integer := 10);
-	port(divident : in STD_LOGIC_VECTOR(5 downto 0);
-			quotient : out STD_LOGIC_VECTOR(3 downto 0);
-			remainder : out STD_LOGIC_VECTOR(3 downto 0));
-end component;
--- debounce component
-component debounce is
-    generic(
-        pulse: boolean := true;
-        active_low: boolean := true;
-        delay: integer := 100000);
-    port (
-        clk: in std_logic;
-        reset: in std_logic; -- active low
-        input: in std_logic;
-        debounce: out std_logic);
-end component;
 
 -- Signals
 signal temp1,temp2,temp3,temp4 : STD_LOGIC_VECTOR(6 downto 0);
